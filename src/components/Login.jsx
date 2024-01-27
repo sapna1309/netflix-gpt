@@ -83,7 +83,7 @@ const Login = () => {
         .then((userCredential) => {
           // Signed up
           const user = userCredential.user;
-          updateProfile(auth.currentUser, {
+          updateProfile(user, {
             displayName: values?.name,
             photoURL: "https://avatars.githubusercontent.com/u/110045725?v=4",
           })
@@ -97,13 +97,11 @@ const Login = () => {
                   name: displayName,
                 })
               );
-              navigate("/browse");
             })
             .catch((error) => {
               // An error occurred
-              // ...
+              setErrorMessage(error.message);
             });
-          console.log("user", user);
         })
         .catch((error) => {
           if (error.code === "auth/email-already-in-use") {
