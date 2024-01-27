@@ -3,6 +3,8 @@ import Header from "./Header";
 import { LOGIN_BG_URL } from "../utils/constants";
 import { useFormik } from "formik";
 import { signInSchema, signUpSchema } from "../schema";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../utils/firebase";
 
 const signUpInitialValues = {
   name: "",
@@ -17,6 +19,7 @@ const signInInitialValues = {
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [errorMessage,setErrorMessage] = useState('');
 
   const {
     values:signInValues,
@@ -33,7 +36,19 @@ const Login = () => {
     validateOnBlur: false,
     // By disabling validation onChange and onBlur formik will validate on submit.
     onSubmit: (values, action) => {
-      console.log("🚀 values", values);
+     // console.log("🚀 values", values);
+     signInWithEmailAndPassword(auth, values?.email, values?.password)
+     .then((userCredential) => {
+       // Signed up 
+       const user = userCredential.user;
+       console.log("user", user);
+     })
+     .catch((error) => {
+      if(error.code==='auth/invalid-credential'){
+        setErrorMessage('Invalid credentials, please try again !');
+      }
+     
+     });
       //to get rid of all the values after submitting the form
       action.resetForm();
     },
@@ -54,14 +69,25 @@ const Login = () => {
     validateOnBlur: false,
     // By disabling validation onChange and onBlur formik will validate on submit.
     onSubmit: (values, action) => {
-      console.log("🚀 values", values);
+      //console.log("🚀 values", values);
+      createUserWithEmailAndPassword(auth, values?.email, values?.password)
+  .then((userCredential) => {
+    // Signed up 
+    const user = userCredential.user;
+    console.log("user", user);
+  })
+  .catch((error) => {
+    if(error.code ==='auth/email-already-in-use'){
+      setErrorMessage('Email already in use, please try again !');
+    }
+    
+  });
       //to get rid of all the values after submitting the form
       action.resetForm();
     },
   });
 
-  console.log("valuessss", isSignUp);
-
+ 
   return (
     <div className="w-full">
       <Header />
@@ -72,8 +98,11 @@ const Login = () => {
         <form
           action=""
           onSubmit={signUpHandleSubmit}
-          className="absolute  w-3/12 rounded-md bg-opacity-80 top-1/2 -translate-y-1/2 left-1/2 bg-black p-14 -translate-x-1/2"
+          className="absolute w-full sm:w-3/4 md:w-3/12 rounded-md bg-opacity-80 top-24 md:top-1/2 md:-translate-y-1/2 left-1/2 bg-black p-14 -translate-x-1/2"
         >
+           {errorMessage && (
+            <p className="text-red-500 text-sm -mt-2 mb-4">{errorMessage}</p>
+          ) }
           <h1 className="text-white text-3xl font-bold pb-4">SIgn Up</h1>
           <input
             type="text"
@@ -95,7 +124,6 @@ const Login = () => {
             value={signUpValues?.email}
             onChange={signUpHandleChange}
             onBlur={signUpHandleBlur}
-            autoComplete="off"
             className="p-3 my-2 w-full border focus:bg-opacity-60 rounded-sm  border-gray-500  bg-gray-700"
           />
           {signUpErrors?.email && signUpTouched?.email ? (
@@ -136,7 +164,10 @@ const Login = () => {
           </button>
           <p
             className="text-gray-400 cursor-pointer"
-            onClick={() => setIsSignUp(!isSignUp)}
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setErrorMessage("");
+            }}
           >
             Already registered?{" "}
             <span className="font-semibold text-white text-md">
@@ -148,8 +179,11 @@ const Login = () => {
         <form
           action=""
           onSubmit={signInHandleSubmit}
-          className="absolute  w-3/12 rounded-md bg-opacity-80 top-1/2 -translate-y-1/2 left-1/2 bg-black p-14 -translate-x-1/2"
+          className="absolute w-full sm:w-3/4 md:w-3/12 rounded-md bg-opacity-80 top-40 md:top-1/2 md:-translate-y-1/2 left-1/2 bg-black p-14 -translate-x-1/2"
         >
+           {errorMessage && (
+            <p className="text-red-500 text-sm -mt-2 mb-4">{errorMessage}</p>
+          ) }
           <h1 className="text-white text-3xl font-bold pb-4">Sign In</h1>
           <input
             type="email"
@@ -158,7 +192,6 @@ const Login = () => {
             value={signInValues?.email}
             onChange={signInHandleChange}
             onBlur={signInHandleBlur}
-            autoComplete="off"
             className="p-3 my-2 w-full border focus:bg-opacity-60 rounded-sm  border-gray-500  bg-gray-700"
           />
           {signInErrors?.email && signInTouched?.email ? (
@@ -186,7 +219,10 @@ const Login = () => {
           </button>
           <p
             className="text-gray-400 cursor-pointer"
-            onClick={() => setIsSignUp(!isSignUp)}
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setErrorMessage("");
+            }}
           >
             New to Netflix?{" "}
             <span className="font-semibold text-white text-md">
