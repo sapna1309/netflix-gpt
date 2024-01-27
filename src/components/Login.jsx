@@ -3,8 +3,15 @@ import Header from "./Header";
 import { LOGIN_BG_URL } from "../utils/constants";
 import { useFormik } from "formik";
 import { signInSchema, signUpSchema } from "../schema";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
 
 const signUpInitialValues = {
   name: "",
@@ -19,16 +26,18 @@ const signInInitialValues = {
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [errorMessage,setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const {
-    values:signInValues,
+    values: signInValues,
     isSubmitting: signInIsSubmitting,
-    touched:signInTouched,
-    errors:signInErrors,
-    handleBlur:signInHandleBlur,
-    handleSubmit:signInHandleSubmit,
-    handleChange:signInHandleChange,
+    touched: signInTouched,
+    errors: signInErrors,
+    handleBlur: signInHandleBlur,
+    handleSubmit: signInHandleSubmit,
+    handleChange: signInHandleChange,
   } = useFormik({
     initialValues: signInInitialValues,
     validationSchema: signInSchema,
@@ -36,19 +45,19 @@ const Login = () => {
     validateOnBlur: false,
     // By disabling validation onChange and onBlur formik will validate on submit.
     onSubmit: (values, action) => {
-     // console.log("🚀 values", values);
-     signInWithEmailAndPassword(auth, values?.email, values?.password)
-     .then((userCredential) => {
-       // Signed up 
-       const user = userCredential.user;
-       console.log("user", user);
-     })
-     .catch((error) => {
-      if(error.code==='auth/invalid-credential'){
-        setErrorMessage('Invalid credentials, please try again !');
-      }
-     
-     });
+      // console.log("🚀 values", values);
+      signInWithEmailAndPassword(auth, values?.email, values?.password)
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log("user", user);
+          navigate("/browse");
+        })
+        .catch((error) => {
+          if (error.code === "auth/invalid-credential") {
+            setErrorMessage("Invalid credentials, please try again !");
+          }
+        });
       //to get rid of all the values after submitting the form
       action.resetForm();
     },
@@ -57,11 +66,11 @@ const Login = () => {
   const {
     values: signUpValues,
     isSubmitting: signUpIsSubmitting,
-    touched:signUpTouched,
-    errors:signUpErrors,
-    handleBlur:signUpHandleBlur,
-    handleSubmit:signUpHandleSubmit,
-    handleChange:signUpHandleChange,
+    touched: signUpTouched,
+    errors: signUpErrors,
+    handleBlur: signUpHandleBlur,
+    handleSubmit: signUpHandleSubmit,
+    handleChange: signUpHandleChange,
   } = useFormik({
     initialValues: signUpInitialValues,
     validationSchema: signUpSchema,
@@ -71,23 +80,41 @@ const Login = () => {
     onSubmit: (values, action) => {
       //console.log("🚀 values", values);
       createUserWithEmailAndPassword(auth, values?.email, values?.password)
-  .then((userCredential) => {
-    // Signed up 
-    const user = userCredential.user;
-    console.log("user", user);
-  })
-  .catch((error) => {
-    if(error.code ==='auth/email-already-in-use'){
-      setErrorMessage('Email already in use, please try again !');
-    }
-    
-  });
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          updateProfile(auth.currentUser, {
+            displayName: values?.name,
+            photoURL: "https://avatars.githubusercontent.com/u/110045725?v=4",
+          })
+            .then(() => {
+              // Profile updated!
+              const { uid, email, displayName } = auth.currentUser;
+              dispatch(
+                addUser({
+                  uid: uid,
+                  email: email,
+                  name: displayName,
+                })
+              );
+              navigate("/browse");
+            })
+            .catch((error) => {
+              // An error occurred
+              // ...
+            });
+          console.log("user", user);
+        })
+        .catch((error) => {
+          if (error.code === "auth/email-already-in-use") {
+            setErrorMessage("Email already in use, please try again !");
+          }
+        });
       //to get rid of all the values after submitting the form
       action.resetForm();
     },
   });
 
- 
   return (
     <div className="w-full">
       <Header />
@@ -100,9 +127,9 @@ const Login = () => {
           onSubmit={signUpHandleSubmit}
           className="absolute w-full sm:w-3/4 md:w-3/12 rounded-md bg-opacity-80 top-24 md:top-1/2 md:-translate-y-1/2 left-1/2 bg-black p-14 -translate-x-1/2"
         >
-           {errorMessage && (
+          {errorMessage && (
             <p className="text-red-500 text-sm -mt-2 mb-4">{errorMessage}</p>
-          ) }
+          )}
           <h1 className="text-white text-3xl font-bold pb-4">SIgn Up</h1>
           <input
             type="text"
@@ -139,7 +166,9 @@ const Login = () => {
             className="p-3 my-2 w-full focus:bg-opacity-60 rounded-sm border border-gray-500 bg-gray-700"
           />
           {signUpErrors?.password && signUpTouched?.password ? (
-            <p className="text-red-500 text-xs -mt-2">{signUpErrors?.password}</p>
+            <p className="text-red-500 text-xs -mt-2">
+              {signUpErrors?.password}
+            </p>
           ) : null}
           <input
             type="password"
@@ -181,9 +210,9 @@ const Login = () => {
           onSubmit={signInHandleSubmit}
           className="absolute w-full sm:w-3/4 md:w-3/12 rounded-md bg-opacity-80 top-40 md:top-1/2 md:-translate-y-1/2 left-1/2 bg-black p-14 -translate-x-1/2"
         >
-           {errorMessage && (
+          {errorMessage && (
             <p className="text-red-500 text-sm -mt-2 mb-4">{errorMessage}</p>
-          ) }
+          )}
           <h1 className="text-white text-3xl font-bold pb-4">Sign In</h1>
           <input
             type="email"
@@ -207,7 +236,9 @@ const Login = () => {
             className="p-3 my-2 w-full focus:bg-opacity-60 rounded-sm border border-gray-500 bg-gray-700"
           />
           {signInErrors?.password && signInTouched?.password ? (
-            <p className="text-red-500 text-xs -mt-2">{signInErrors?.password}</p>
+            <p className="text-red-500 text-xs -mt-2">
+              {signInErrors?.password}
+            </p>
           ) : null}
 
           <button
