@@ -1,0 +1,18 @@
+.scrollbar-box{
+    display:flex;
+    overflow-x: auto;
+}
+::-webkit-scrollbar {
+    height: 0.2vw;
+    width: 0.2vw;
+    padding-top: 15px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(41, 41, 41);
+    border-radius: 10px;
+  }

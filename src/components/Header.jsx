@@ -45,7 +45,7 @@ const Header = () => {
 
 
   return (
-    <div className="fixed justify-between flex px-4 z-10 py-1 left-0 top-0 right-0 bg-gradient-to-b from-black">
+    <div className="fixed justify-between flex px-4 z-20 py-1 left-0 top-0 right-0 bg-gradient-to-b from-black">
       <img src={LOGO} className="w-44" alt="logo" />
       {user && (
         <div className="flex items-center pr-4 gap-x-4">
