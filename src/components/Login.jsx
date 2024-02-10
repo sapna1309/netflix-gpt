@@ -51,7 +51,6 @@ const Login = () => {
           // Signed in
           const user = userCredential.user;
           console.log("user", user);
-          navigate("/browse");
         })
         .catch((error) => {
           if (error.code === "auth/invalid-credential") {

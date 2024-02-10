@@ -15,7 +15,6 @@ const Header = () => {
   const handleSignOut = () => {
     signOut(auth).then(() => {
       // Sign-out successful.
-      navigate('/')
     }).catch((error) => {
       // An error happened.
       navigate('/error');
@@ -46,7 +45,7 @@ const Header = () => {
 
 
   return (
-    <div className="absolute justify-between flex px-4 z-10 py-4 left-0 top-0 right-0  bg-gradient-to-b from-black">
+    <div className="fixed justify-between flex px-4 z-10 py-1 left-0 top-0 right-0 bg-gradient-to-b from-black">
       <img src={LOGO} className="w-44" alt="logo" />
       {user && (
         <div className="flex items-center pr-4 gap-x-4">
