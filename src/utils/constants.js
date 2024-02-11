@@ -8,7 +8,7 @@ export const USER_AVATAR =
     method: 'GET',
     headers: {
       accept: 'application/json',
-      Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxYjA4NzY2NWUyNTQwMDYwZGMyNmJhMmYxYTBiN2FhNyIsInN1YiI6IjYzMWRlNTIzNDM1MDExMDA3Zjk3ZGE2OCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.z9WzKZDbtszEyyvOWh6aiMckxIV_P4nAaQ5zoUdJ2XE'
+      Authorization: process.env.REACT_APP_TMDB_TOKEN
     }
   };
   
